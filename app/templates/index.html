@@ -1,0 +1,705 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <!-- Upload Area -->
+            <div class="row mb-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="card" id="dropZone">
+                        <div class="card-body text-center p-5">
+                            <h5>Upload Dataset</h5>
+                            <p class="text-muted">Click to select a CSV file</p>
+                            <form id="uploadForm">
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress mb-4" style="height: 4px; display: none;">
+                <div id="progressBar" class="progress-bar" role="progressbar"></div>
+            </div>
+
+            <!-- Results Area -->
+            <div id="results" style="display: none;">
+                <div class="row">
+                    <!-- Dataset Statistics -->
+                    <div class="col-12 mb-4" id="datasetStats">
+                        <div class="card">
+                            <div class="card-header">Dataset Statistics</div>
+                            <div class="card-body">
+                                <div id="initialStats"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preprocessing Results -->
+                    <div class="col-12 mb-4" id="preprocessingSection" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">Preprocessing Results</div>
+                            <div class="card-body">
+                                <div id="preprocessingResults"></div>
+                            </div>
+                            </div>
+                        </div>
+                        
+                    <!-- Model Results -->
+                    <div class="col-12 mb-4" id="modelResultsSection" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <span>Model Results</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="modelResults" class="row"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Recommendations -->
+                    <div class="col-12 mb-4">
+                        <div class="card" id="modelRecommendations" style="display: none;">
+                            <div class="card-header">Model Recommendations</div>
+                            <div class="card-body">
+                                <div id="recommendationsContent"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Results -->
+                    <div class="col-12 mb-4" id="comparisonSection" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">Model Comparison</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <img id="comparisonPlot" class="img-fluid" style="display: none;">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0">Best Performing Model</h6>
+                                            </div>
+                                            <div class="card-body" id="bestModelInfo">
+                                                <!-- Best model info will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Display -->
+            <div id="error" class="alert alert-danger" style="display: none;"></div>
+        </div>
+
+        <!-- Right Panel - Buttons -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Controls</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Configuration Options -->
+                    <div id="configOptions" style="display: none;">
+                        <div class="mb-3">
+                            <label for="targetColumn" class="form-label">Target Column</label>
+                            <select class="form-select" id="targetColumn" required>
+                                <option value="">Select target column...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="preprocessingMethod" class="form-label">Preprocessing Method</label>
+                            <select class="form-select" id="preprocessingMethod">
+                                <option value="standard">Standard Scaling</option>
+                                <option value="minmax">Min-Max Scaling</option>
+                                <option value="normalize">Normalization</option>
+                                <option value="none">No Preprocessing</option>
+                            </select>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="button" id="preprocessBtn" class="btn btn-secondary" disabled>
+                            Preprocess Data
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="knnBtn" class="btn btn-primary" disabled>
+                            Run KNN
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="svmBtn" class="btn btn-primary" disabled>
+                            Run SVM
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="xgboostBtn" class="btn btn-primary" disabled>
+                            Run XGBoost
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="rfBtn" class="btn btn-primary" disabled>
+                            Run Random Forest
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="nbBtn" class="btn btn-primary" disabled>
+                            Run Naive Bayes
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                        <button type="button" id="compareBtn" class="btn btn-success" disabled>
+                            Compare Models
+                            <div class="spinner-border spinner-border-sm float-end d-none" role="status"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn {
+    text-align: left;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .col-md-3 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+let uploadedData = null;
+let preprocessedData = null;
+let modelResults = {};
+let completedSteps = new Set();
+
+// Function to show only specific result section
+function showSection(sectionId) {
+    // Hide all sections first
+    const sections = [
+        'datasetStats',
+        'preprocessingSection',
+        'modelResultsSection',
+        'comparisonSection'
+    ];
+    
+    sections.forEach(section => {
+        const element = document.getElementById(section);
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
+    
+    // Show the requested section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+    }
+}
+
+function resetUI() {
+    // Hide all sections
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('configOptions').style.display = 'none';
+    
+    // Reset buttons
+    resetButtons();
+    
+    // Clear all data
+    uploadedData = null;
+    preprocessedData = null;
+    modelResults = {};
+    
+    // Clear all section contents
+    [
+        'initialStats',
+        'preprocessingResults',
+        'modelResults',
+        'accuracyPlot'
+    ].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (id === 'accuracyPlot') {
+                element.style.display = 'none';
+                element.src = '';
+            } else {
+                element.innerHTML = '';
+            }
+        }
+    });
+
+    // Hide all individual sections
+    [
+        'datasetStats',
+        'preprocessingSection',
+        'modelResultsSection',
+        'comparisonSection'
+    ].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
+
+    // Reset form elements
+    const targetSelect = document.getElementById('targetColumn');
+    if (targetSelect) {
+        targetSelect.innerHTML = '<option value="">Select target column...</option>';
+    }
+
+    const preprocessingMethod = document.getElementById('preprocessingMethod');
+    if (preprocessingMethod) {
+        preprocessingMethod.selectedIndex = 0;
+    }
+}
+
+// File upload handling
+document.getElementById('file').addEventListener('change', async function(e) {
+    try {
+        // Reset UI first
+        resetUI();
+        
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+            showError('Please upload a CSV file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        await uploadFile(formData);
+    } catch (error) {
+        console.error('File upload error:', error);
+        showError('Error uploading file. Please try again.');
+    }
+});
+
+function resetButtons() {
+    // Disable all buttons except file upload
+    document.getElementById('preprocessBtn').disabled = true;
+    document.getElementById('knnBtn').disabled = true;
+    document.getElementById('svmBtn').disabled = true;
+    document.getElementById('xgboostBtn').disabled = true;
+    document.getElementById('rfBtn').disabled = true;
+    document.getElementById('nbBtn').disabled = true;
+    document.getElementById('compareBtn').disabled = true;
+
+    // Reset progress
+    completedSteps.clear();
+    updateProgress();
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+async function uploadFile(formData) {
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        uploadedData = data;
+        
+        // Show only configuration options first
+        document.getElementById('configOptions').style.display = 'block';
+        document.getElementById('results').style.display = 'block';
+        
+        // Populate target column select
+        const targetSelect = document.getElementById('targetColumn');
+        targetSelect.innerHTML = '<option value="">Select target column...</option>';
+        
+        // Define columns to exclude from target selection
+        const excludedColumns = [
+            'id', 'timestamp', 'date', 'time', 'index', 'row_id',
+            'source_ip', 'destination_ip', 'source_port', 'destination_port',
+            'protocol', 'packet_length', 'flow_duration'
+        ];
+        
+        data.columns.forEach(col => {
+            // Skip excluded columns and numeric columns
+            if (!excludedColumns.includes(col.name.toLowerCase()) && 
+                col.type !== 'float64' && 
+                col.type !== 'int64') {
+                const option = document.createElement('option');
+                option.value = col.name;
+                option.textContent = `${col.name} (${col.type})`;
+                if (col.name === data.suggested_target) {
+                    option.selected = true;
+                }
+                targetSelect.appendChild(option);
+            }
+        });
+        
+        // Enable only preprocess button
+        document.getElementById('preprocessBtn').disabled = false;
+        
+        // Show only dataset stats
+        displayDatasetStats(data);
+        showSection('datasetStats');
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        showError('Error uploading file. Please ensure it is a valid CSV file.');
+    }
+}
+
+function displayDatasetStats(data) {
+    const statsDiv = document.getElementById('initialStats');
+    statsDiv.innerHTML = `
+        <div>
+            <h6>Dataset Overview</h6>
+            <p><strong>Total Records:</strong> ${data.total_records}</p>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Type</th>
+                            <th>Unique Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.columns.map(col => `
+                            <tr>
+                                <td>${col.name}</td>
+                                <td>${col.type}</td>
+                                <td>${col.unique_values || 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function displayPreprocessingResults(data) {
+    const resultsDiv = document.getElementById('preprocessingResults');
+    resultsDiv.innerHTML = `
+        <div>
+            <h6>Preprocessing Complete</h6>
+            <ul class="list-unstyled">
+                <li>✓ Data split into training (${data.train_size} samples) and testing (${data.test_size} samples)</li>
+                <li>✓ Features preprocessed using ${document.getElementById('preprocessingMethod').value} scaling</li>
+                <li>✓ Target column: ${document.getElementById('targetColumn').value}</li>
+            </ul>
+        </div>
+    `;
+}
+
+function setLoading(buttonId, isLoading) {
+    const button = document.getElementById(buttonId);
+    const spinner = button.querySelector('.spinner-border');
+    
+    if (isLoading) {
+        button.disabled = true;
+        spinner.classList.remove('d-none');
+    } else {
+        button.disabled = false;
+        spinner.classList.add('d-none');
+    }
+}
+
+// Preprocess button handler
+document.getElementById('preprocessBtn').addEventListener('click', async () => {
+    try {
+        setLoading('preprocessBtn', true);
+        
+        const targetColumn = document.getElementById('targetColumn').value;
+        if (!targetColumn) {
+            showError('Please select a target column');
+            return;
+        }
+        
+        const preprocessingMethod = document.getElementById('preprocessingMethod').value;
+        
+        const response = await fetch('/preprocess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ...uploadedData,
+                target_column: targetColumn,
+                preprocessing_method: preprocessingMethod
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        preprocessedData = data;
+        completedSteps.add('preprocess');
+        updateProgress();
+        
+        // Enable model buttons
+        document.getElementById('knnBtn').disabled = false;
+        document.getElementById('svmBtn').disabled = false;
+        document.getElementById('xgboostBtn').disabled = false;
+        document.getElementById('rfBtn').disabled = false;
+        document.getElementById('nbBtn').disabled = false;
+        document.getElementById('compareBtn').disabled = false;
+        
+        displayPreprocessingResults(data);
+        showSection('preprocessingSection');
+        
+    } catch (error) {
+        showError('Error during preprocessing');
+    } finally {
+        setLoading('preprocessBtn', false);
+    }
+});
+
+// Model button handlers
+['knn', 'svm', 'xgboost', 'rf', 'nb'].forEach(model => {
+    document.getElementById(`${model}Btn`).addEventListener('click', () => runModel(model));
+});
+
+async function runModel(modelName) {
+    try {
+        setLoading(`${modelName}Btn`, true);
+        
+        const response = await fetch(`/run_model/${modelName}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(preprocessedData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        modelResults[modelName.toUpperCase()] = data.results;
+        completedSteps.add(modelName);
+        updateProgress();
+        
+        document.getElementById('compareBtn').disabled = Object.keys(modelResults).length < 1;
+        
+        updateModelResults(modelName, data.results);
+        showSection('modelResultsSection');
+        
+    } catch (error) {
+        showError(`Error running ${modelName}`);
+    } finally {
+        setLoading(`${modelName}Btn`, false);
+    }
+}
+
+// Compare button handler
+document.getElementById('compareBtn').addEventListener('click', async () => {
+    try {
+        setLoading('compareBtn', true);
+        
+        // Check if we have at least one model result
+        if (Object.keys(modelResults).length === 0) {
+            showError('Please run at least one model before comparing');
+            return;
+        }
+        
+        // Structure the results properly
+        const structuredResults = {};
+        Object.entries(modelResults).forEach(([model, results]) => {
+            structuredResults[model] = {
+                accuracy: results.accuracy,
+                precision: results.precision,
+                recall: results.recall,
+                f1: results.f1
+            };
+        });
+        
+        const response = await fetch('/compare_models', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ results: structuredResults })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        completedSteps.add('compare');
+        updateProgress();
+        
+        // Display the comparison plot
+        const plotImg = document.getElementById('comparisonPlot');
+        plotImg.src = `data:image/png;base64,${data.plot}`;
+        plotImg.style.display = 'block';
+        
+        // Find the best performing model
+        let bestModel = null;
+        let bestAccuracy = 0;
+        Object.entries(modelResults).forEach(([model, results]) => {
+            if (results.accuracy > bestAccuracy) {
+                bestAccuracy = results.accuracy;
+                bestModel = model;
+            }
+        });
+        
+        // Display best model information
+        const bestModelInfo = document.getElementById('bestModelInfo');
+        bestModelInfo.innerHTML = `
+            <h5 class="text-success">${bestModel}</h5>
+            <table class="table table-sm">
+                <tbody>
+                    <tr>
+                        <td><strong>Accuracy:</strong></td>
+                        <td>${modelResults[bestModel].accuracy.toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Precision:</strong></td>
+                        <td>${modelResults[bestModel].precision.toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recall:</strong></td>
+                        <td>${modelResults[bestModel].recall.toFixed(2)}%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>F1 Score:</strong></td>
+                        <td>${modelResults[bestModel].f1.toFixed(2)}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        
+        showSection('comparisonSection');
+        
+    } catch (error) {
+        console.error('Comparison error:', error);
+        showError('Error comparing models: ' + error.message);
+    } finally {
+        setLoading('compareBtn', false);
+    }
+});
+
+function updateModelResults(modelName, results) {
+    const resultsDiv = document.getElementById('modelResults');
+    
+    // Update the specific model's results in the modelResults object
+    modelResults[modelName.toUpperCase()] = results;
+    
+    // Create HTML for all model results
+    let resultsHTML = '<div class="row">';
+    
+    // Loop through all models that have results
+    Object.entries(modelResults).forEach(([model, modelResults]) => {
+        resultsHTML += `
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">${model} Results</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Accuracy:</strong></td>
+                                    <td>${modelResults.accuracy.toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Precision:</strong></td>
+                                    <td>${modelResults.precision.toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Recall:</strong></td>
+                                    <td>${modelResults.recall.toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>F1 Score:</strong></td>
+                                    <td>${modelResults.f1.toFixed(2)}%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        `;
+    });
+    
+    resultsHTML += '</div>';
+    resultsDiv.innerHTML = resultsHTML;
+    
+    // Show the model results section
+    showSection('modelResultsSection');
+}
+
+function updateProgress() {
+    const totalSteps = 8;
+    const progress = (completedSteps.size / totalSteps) * 100;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+}
+
+// Rest of your existing JavaScript functions...
+</script>
+{% endblock %}
