@@ -67,9 +67,6 @@ If you encounter issues with specific models:
 - **Decision Tree**: Check for class imbalance in your dataset
 - **All Models**: Ensure your data doesn't contain missing values or non-numeric features
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
