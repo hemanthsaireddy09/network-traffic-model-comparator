@@ -15,8 +15,7 @@ This application allows you to analyze network traffic data using various machin
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/network_traffic_web.git
-cd network_traffic_web
+git clone https://github.com/hemanthsaireddy09/network-traffic-model-comparator.git
 ```
 
 2. Install the required dependencies:
@@ -31,19 +30,7 @@ python app.py
 
 4. Open your browser and navigate to `http://localhost:5000`
 
-## Downloading Datasets
 
-The application includes a script to download and prepare network traffic datasets:
-
-```bash
-python download_dataset.py
-```
-
-This script will download:
-- NSL-KDD dataset (full and sample versions)
-- Create a sample of the CIC-IDS2017 dataset
-
-The datasets will be saved in the `data` directory.
 
 ## Using the Application
 
